@@ -25,12 +25,12 @@ You will be given the user's original question and a detailed explanation of the
 
 First, seamlessly integrate the provided explanation into your response. Then, use that context to directly  and compprehensively answer the original question.
 
-Return your final synthesized answer as a JSON object with a single key: "final_answer".
+Return your final synthesized answer as plain text.
 
 ---
 CONTEXT:
 Original Question: "{original_question}"
 Key Concept Explanation: "{explanation}"
 
-JSON output: 
+ 
 """
