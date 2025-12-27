@@ -27,7 +27,7 @@ def main():
     """
     while True:
         # 1. Get input
-        question = input("-----------CLIMATE SCIENCE ASSISTANT------------\n\n What do you want to know about climate science today?\n\n ")
+        question = input("-----------ATMO------------\n\n What do you want to know about climate science today?\n\n ")
 
         # 2. Check for exit
         if question.lower() in ["quit", "exit", "q"]:

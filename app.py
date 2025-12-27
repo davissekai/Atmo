@@ -5,7 +5,7 @@ from main import get_climate_response
 
 
 app = FastAPI(          # This is an instance of the end point.. and within it are its details.
-            title="Climate Science Assistant",
+            title="Atmo",
             description="LLM-powered climate Q&A",
             version="0.1.0")
 
