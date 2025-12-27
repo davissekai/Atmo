@@ -1,27 +1,35 @@
-from fastapi import FastAPI
-from main import get_climate_response
+from fastapi import FastAPI, HTTPException  
 from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
+from main import get_climate_response
 
-app = FastAPI(title="Climate Science Assistant API")
 
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to the Climate Science Assistant API. Use /ask?q=YOUR_QUESTION to interact."}
+app = FastAPI(          # This is an instance of the end point.. and within it are its details.
+            title="Climate Science Assistant",
+            description="LLM-powered climate Q&A",
+            version="0.1.0")
 
-@app.get("/ask")
-def ask_question(q: str):
+
+# This is a class that defines the structure of the request body, but why a class.. a class is a blue print.. 
+class Query(BaseModel):
+    """Schema for the request body."""
+    question: str
+
+# this, I dont have much of an idea on what it does.. but it is a decorator. (Autocomplete put in there that its a decorator lol.. whats a decorator?)
+@app.post("/ask")
+async def ask_climate(query: Query):
     """
-    Bridge to our Modular Service Layer!
-    This endpoint takes a question 'q' and streams back the answer.
+    Receives a climate question and streams the LLM response back.
     """
-    if not q:
-        return {"error": "Please provide a question using the 'q' parameter."}
-    
-    # Because we refactored in Phase 2, we just call the function!
-    response_stream = get_climate_response(q)
-    
-    def generate():
-        for chunk in response_stream:
-            yield chunk.text
+    try:
+        response_stream = get_climate_response(query.question)
 
-    return StreamingResponse(generate(), media_type="text/plain")
+        def generate():
+            for chunk in response_stream:
+                yield chunk.text
+
+        return StreamingResponse(generate(), media_type="text/plain")
+
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+        

@@ -1,10 +1,9 @@
-<<<<<<< HEAD
 .env
 venv/
 __pycache__/
 .pytest_cache/
 *.pyc
-=======
+
 ### AL ###
 #Template for AL projects for Dynamics 365 Business Central
 #launch.json folder
@@ -27,4 +26,3 @@ rad.json
 *.flf
 #Test results file
 TestResults.xml
->>>>>>> 4a0a23c241877455c39688afcc1e2b15abbcdc5c

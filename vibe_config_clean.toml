@@ -1,0 +1,9 @@
+active_model = "devstral-2"
+vim_keybindings = false
+disable_welcome_banner_animation = false
+displayed_workdir = ""
+auto_compact_threshold = 200000
+context_warnings = false
+textual_theme = "textual-dark"
+instructions = ""
+system_prompt_id = "cli"
