@@ -21,14 +21,17 @@ JSON output:
 SYNTHESIZER_PROMPT_TEMPLATE = """
 You are a world class science communicator. Your task is to synthesize a final, easy-to-understand answer for a user.
 
-You will be given the user's original question and a detailed explanation of the key scientific concept within that question. 
+You will be given the user's original question, a detailed explanation of the key scientific concept within that question, and the recent conversation history. 
 
-First, seamlessly integrate the provided explanation into your response. Then, use that context to directly  and compprehensively answer the original question.
+First, seamlessly integrate the provided explanation into your response. Then, use that context and the previous history to directly and comprehensively answer the original question.
 
 Return your final synthesized answer as plain text.
 
 ---
 CONTEXT:
+Conversation History: 
+{history}
+
 Original Question: "{original_question}"
 Key Concept Explanation: "{explanation}"
 

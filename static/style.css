@@ -1,0 +1,401 @@
+/* --- Reset & Base --- */
+:root {
+    --forest-green: #1b4332;
+    --emerald: #2d6a4f;
+    --glacial-blue: #90e0ef;
+    --sky-blue: #caf0f8;
+    --abyssal-black: #0a0a0a;
+    --matte-black: #1a1a1a;
+    --glass-white: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --sidebar-width: 280px;
+    --transition-speed: 0.4s;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--abyssal-black);
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
+}
+
+/* --- Layout --- */
+.app-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+    z-index: 10;
+}
+
+/* --- Backgrounds --- */
+.bg-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 100% 100%, rgba(27, 67, 50, 0.15), transparent);
+    z-index: 1;
+}
+
+.earth-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* New high-fidelity bright Earth shot */
+    background: url('/static/earth_bg.png') no-repeat center center;
+    background-size: cover;
+    opacity: 0;
+    transition: opacity 1s ease;
+    z-index: 0;
+}
+
+body.launch-mode .earth-bg {
+    opacity: 0.8;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--matte-black);
+    border-right: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    transition: transform var(--transition-speed) ease, width var(--transition-speed) ease;
+    z-index: 100;
+}
+
+.sidebar.collapsed {
+    width: 0;
+    padding: 0;
+    overflow: hidden;
+    border: none;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: -0.5px;
+}
+
+.logo-atmo {
+    color: var(--text-primary);
+}
+
+.logo-icon {
+    color: var(--emerald);
+}
+
+.new-chat-btn {
+    background: var(--forest-green);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.2rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 2rem;
+    width: 100%;
+}
+
+.new-chat-btn:hover {
+    background: var(--emerald);
+}
+
+.history-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.footer-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.8rem;
+    width: 100%;
+    border-radius: 8px;
+}
+
+.footer-btn:hover {
+    background: var(--glass-white);
+    color: var(--text-primary);
+}
+
+/* --- Main Content --- */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.mobile-header {
+    display: none;
+    /* Hide for now */
+    padding: 1rem;
+    border-bottom: 1px solid var(--glass-border);
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 2rem 1rem;
+    justify-content: center;
+    /* Centered in launch mode */
+}
+
+body.chat-mode .chat-container {
+    justify-content: flex-start;
+}
+
+/* --- Hero (Launch State) --- */
+.hero {
+    text-align: center;
+    margin-bottom: 2rem;
+    transition: all var(--transition-speed) ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.hero-logo .logo-icon-large {
+    width: 64px;
+    height: 64px;
+    color: var(--emerald);
+}
+
+.greeting {
+    font-size: 2.5rem;
+    font-weight: 600;
+    background: linear-gradient(to bottom, #fff, #a0a0a0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.2;
+}
+
+body.chat-mode .hero {
+    display: none;
+}
+
+/* --- Input Area --- */
+.input-wrapper {
+    width: 100%;
+    transition: all var(--transition-speed) ease;
+    position: relative;
+}
+
+body.launch-mode .input-wrapper {
+    margin-bottom: 10vh;
+    /* Lifted from bottom */
+}
+
+body.chat-mode .input-wrapper {
+    padding: 1rem 0;
+    background: var(--abyssal-black);
+}
+
+.input-pill {
+    background: var(--matte-black);
+    border: 1px solid var(--glass-border);
+    border-radius: 28px;
+    padding: 0.6rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    transition: border-color 0.2s;
+}
+
+body.launch-mode .input-pill {
+    background: var(--glass-white);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 1rem 1.5rem;
+    border-radius: 32px;
+}
+
+.input-pill:focus-within {
+    border-color: var(--emerald);
+}
+
+textarea {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #ffffff;
+    /* Brighter for legibility */
+    font-size: 1.1rem;
+    font-family: inherit;
+    resize: none;
+    outline: none;
+    padding: 0.4rem 0;
+    max-height: 200px;
+}
+
+textarea::placeholder {
+    color: #888888;
+    /* Better contrast for ghost text */
+}
+
+.action-btn {
+    background: var(--forest-green);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.action-btn:hover {
+    background: var(--emerald);
+    transform: scale(1.05);
+}
+
+/* --- Messages (Chat State) --- */
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    display: none;
+    flex-direction: column;
+    gap: 2rem;
+    padding-bottom: 2rem;
+}
+
+body.chat-mode .messages {
+    display: flex;
+}
+
+.message {
+    display: flex;
+    gap: 1.5rem;
+    animation: fadeIn 0.4s ease;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--forest-green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.avatar.user {
+    background: var(--matte-black);
+}
+
+.content {
+    line-height: 1.6;
+    color: #e0e0e0;
+}
+
+.content h1,
+.content h2,
+.content h3 {
+    color: var(--text-primary);
+    margin: 1.5rem 0 0.8rem 0;
+}
+
+.content p {
+    margin-bottom: 1rem;
+}
+
+.content strong {
+    color: var(--emerald);
+}
+
+/* --- Utilities --- */
+.icon-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.icon-btn:hover {
+    background: var(--glass-white);
+    color: var(--text-primary);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Scrollbar - Always visible for context */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--emerald);
+    border: 2px solid var(--abyssal-black);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--sky-blue);
+}

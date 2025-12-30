@@ -9,21 +9,29 @@ load_dotenv()
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 def call_gemini(prompt):
-    model = genai.GenerativeModel("gemini-3-flash-preview")
-    response = model.generate_content(
-        prompt,
-        generation_config={"response_mime_type": "application/json"}
-    )
-    return json.loads(response.text)
+    try:
+        model = genai.GenerativeModel("gemini-2.5-flash-lite")
+        response = model.generate_content(
+            prompt,
+            generation_config={"response_mime_type": "application/json"}
+        )
+        return json.loads(response.text)
+    except Exception as e:
+        print(f"Error calling Gemini: {e}")
+        raise
 
 
 def stream_gemini(prompt):
     """
     Calls Gemini and returns a stream of responses word-by-word. Used for the final synthesis step
     """
-    model = genai.GenerativeModel("gemini-3-flash-preview")
-    response_stream = model.generate_content(prompt, stream=True)
-    return response_stream
+    try:
+        model = genai.GenerativeModel("gemini-2.5-flash-lite")
+        response_stream = model.generate_content(prompt, stream=True)
+        return response_stream
+    except Exception as e:
+        print(f"Error streaming Gemini: {e}")
+        raise
     
 
 

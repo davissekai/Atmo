@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atmo | Climate Science Assistant</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Markdown Rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
+</head>
+
+<body class="launch-mode">
+    <!-- Cinematic Background -->
+    <div class="bg-overlay"></div>
+    <div class="earth-bg"></div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar collapsed" id="sidebar">
+            <div class="sidebar-header">
+                <button class="icon-btn" id="toggle-sidebar" title="Toggle Sidebar">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div class="logo">
+                    <span class="logo-atmo">Atmo</span>
+                    <i data-lucide="globe" class="logo-icon"></i>
+                </div>
+            </div>
+
+            <button class="new-chat-btn" id="new-chat">
+                <i data-lucide="plus"></i>
+                <span>New Chat</span>
+            </button>
+
+            <div class="history-list" id="history-list">
+                <!-- Session items will appear here -->
+            </div>
+
+            <div class="sidebar-footer">
+                <button class="footer-btn">
+                    <i data-lucide="settings"></i>
+                    <span>Settings</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="mobile-header">
+                <button class="icon-btn" id="mobile-menu">
+                    <i data-lucide="menu"></i>
+                </button>
+                <span class="logo-atmo">Atmo</span>
+            </header>
+
+            <div class="chat-container">
+                <!-- Welcome/Hero Area (Launch State) -->
+                <div class="hero" id="hero">
+                    <h1 class="greeting">How can I help you understand our planet today?</h1>
+                    <div class="hero-logo">
+                        <i data-lucide="earth" class="logo-icon-large"></i>
+                    </div>
+                </div>
+
+                <!-- Message Display Area (Chat State) -->
+                <div class="messages" id="messages-display">
+                    <!-- Chat bubbles will stream here -->
+                </div>
+
+                <!-- Input Area (Pill Shape) -->
+                <div class="input-wrapper" id="input-container">
+                    <div class="input-pill">
+                        <textarea id="user-input" placeholder="Ask Atmo about climate data, research, or projections..."
+                            rows="1"></textarea>
+                        <div class="input-actions">
+                            <button class="action-btn" id="send-btn" title="Send Message">
+                                <i data-lucide="arrow-up"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="main.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
