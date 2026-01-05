@@ -5,17 +5,30 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# 1. Configure the API with your key
+# Configure Gemini
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
+# Using Gemini 1.5 Flash for fast, high-quality responses
+MODEL_NAME = "gemini-2.5-flash"
+
+
 def call_gemini(prompt):
+    """
+    Calls Gemini API and returns a JSON response.
+    """
     try:
-        model = genai.GenerativeModel("gemini-2.5-flash-lite")
+        model = genai.GenerativeModel(model_name=MODEL_NAME)
         response = model.generate_content(
             prompt,
             generation_config={"response_mime_type": "application/json"}
         )
-        return json.loads(response.text)
+        text = response.text.strip()
+        # Handle if response has markdown code blocks
+        if text.startswith("```json"):
+            text = text[7:-3]
+        elif text.startswith("```"):
+            text = text[3:-3]
+        return json.loads(text)
     except Exception as e:
         print(f"Error calling Gemini: {e}")
         raise
@@ -23,15 +36,20 @@ def call_gemini(prompt):
 
 def stream_gemini(prompt):
     """
-    Calls Gemini and returns a stream of responses word-by-word. Used for the final synthesis step
+    Calls Gemini API and yields streaming responses.
     """
     try:
-        model = genai.GenerativeModel("gemini-2.5-flash-lite")
-        response_stream = model.generate_content(prompt, stream=True)
-        return response_stream
+        model = genai.GenerativeModel(model_name=MODEL_NAME)
+        response = model.generate_content(prompt, stream=True)
+
+        class Chunk:
+            def __init__(self, text):
+                self.text = text
+
+        for chunk in response:
+            if chunk.text:
+                yield Chunk(chunk.text)
+
     except Exception as e:
         print(f"Error streaming Gemini: {e}")
         raise
-    
-
-

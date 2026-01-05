@@ -1,11 +1,12 @@
 from .llm import call_gemini, stream_gemini
+from .prompts import PromptManager
 
-from .prompts import DECOMPOSER_PROMPT_TEMPLATE, EXPLAINER_PROMPT_TEMPLATE, SYNTHESIZER_PROMPT_TEMPLATE
-
+# Initialize centralized prompt manager
+prompt_manager = PromptManager()
 
 def get_climate_response(question, history=None):
     """
-    Service Layer: Orchestrates the 3-step climate chain.
+    Service Layer: Orchestrates the 3-step climate chain with reasoning markers.
     """
     # 1. Format history for the prompt
     history_text = "No previous history."
@@ -13,23 +14,32 @@ def get_climate_response(question, history=None):
         history_text = "\n".join([f"{m['role'].upper()}: {m['content']}" for m in history])
 
     # 2. Step 1: Decompose
-    full_prompt = DECOMPOSER_PROMPT_TEMPLATE.format(user_question=question)
-    response = call_gemini(full_prompt)
-    concept = response['concept']
+    yield "[[START_THOUGHT]]Analyzing your question...[[END_THOUGHT]]"
+    
+    decomposer_prompt = prompt_manager.get_decomposer_prompt(question)
+    response = call_gemini(decomposer_prompt)
+    concept = response.get('concept', 'Unknown Concept')
+
+    yield f"[[START_THOUGHT]]Focusing on: {concept}[[END_THOUGHT]]"
 
     # 3. Step 2: Explain
-    full_prompt = EXPLAINER_PROMPT_TEMPLATE.format(concept_to_explain=concept)
-    response = call_gemini(full_prompt)
-    explanation = response['explanation']
+    explainer_prompt = prompt_manager.get_explainer_prompt(concept)
+    response = call_gemini(explainer_prompt)
+    explanation = response.get('explanation', 'No explanation available.')
+
+    yield f"[[START_FACT]]{explanation}[[END_FACT]]"
 
     # 4. Step 3: Synthesize with history
-    full_prompt = SYNTHESIZER_PROMPT_TEMPLATE.format(
-        original_question=question, 
+    synthesizer_prompt = prompt_manager.get_synthesizer_prompt(
+        question=question, 
         explanation=explanation,
-        history=history_text
+        history_text=history_text
     )
 
-    return stream_gemini(full_prompt)
+    yield "[[START_ANSWER]]"
+    for chunk in stream_gemini(synthesizer_prompt):
+        yield chunk.text
+    yield "[[END_ANSWER]]"
     
 
 def main():

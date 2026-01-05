@@ -3,6 +3,23 @@ venv/
 __pycache__/
 .pytest_cache/
 *.pyc
+.DS_Store
+Thumbs.db
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+build/
+.next/
+.vercel/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 ### AL ###
 #Template for AL projects for Dynamics 365 Business Central

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uvicorn:*)",
+      "Bash(cd:*)",
+      "Bash(npm run dev)",
+      "Bash(cp:*)"
+    ]
+  }
+}

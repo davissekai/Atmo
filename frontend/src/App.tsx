@@ -1,270 +1,299 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Loader2 } from 'lucide-react';
-import { ChatSidebar } from './components/ChatSidebar';
-import { ChatMessage } from './components/ChatMessage';
-import { WelcomeScreen } from './components/WelcomeScreen';
-import { ScrollArea } from './components/ui/scroll-area';
-import { Button } from './components/ui/button';
-
-interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-}
-
-interface ChatSession {
-  id: string;
-  title: string;
-  timestamp: string;
-  messages: Message[];
-}
+import {
+  Plus,
+  Send,
+  Menu,
+  Search,
+  User,
+  Sparkles,
+  ChevronDown,
+  MoreVertical,
+  Edit2,
+  Trash2,
+  Check,
+  X,
+  Loader2,
+  Lightbulb,
+  MessageSquare,
+  Bell,
+  Sun,
+  Moon
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function App() {
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [sessions, setSessions] = useState<ChatSession[]>([
-    {
-      id: '1',
-      title: 'Climate change basics',
-      timestamp: 'Yesterday',
-      messages: [],
-    },
-    {
-      id: '2',
-      title: 'Carbon footprint reduction',
-      timestamp: '3 days ago',
-      messages: [],
-    },
-    {
-      id: '3',
-      title: 'Renewable energy sources',
-      timestamp: 'Last week',
-      messages: [],
-    },
-  ]);
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(localStorage.getItem('atmo_session_id'));
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
-  // Apply dark mode to document
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetchSessions();
+  }, []);
+
   useEffect(() => {
     if (isDarkMode) {
-      document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
     } else {
-      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
     }
   }, [isDarkMode]);
 
-  // Auto-resize textarea
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.style.height = 'auto';
-      inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 200) + 'px';
-    }
-  }, [inputValue]);
-
-  // Scroll to bottom when new message arrives
   useEffect(() => {
     if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
-      }
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
-  }, [messages, isLoading]); // Scroll on load too
+  }, [messages]);
 
-  const handleToggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
+  const fetchSessions = async () => {
+    try {
+      const res = await fetch('http://127.0.0.1:8001/sessions');
+      const data = await res.json();
+      setSessions(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSessionSelect = async (id: string) => {
+    setActiveSessionId(id);
+    if (window.innerWidth < 768) setIsSidebarOpen(false);
+    try {
+      const res = await fetch(`http://127.0.0.1:8001/sessions/${id}`);
+      const data = await res.json();
+      setMessages(data.messages || []);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleNewChat = () => {
     setActiveSessionId(null);
-    localStorage.removeItem('atmo_session_id');
     setMessages([]);
-  };
-
-  const handleSessionSelect = (id: string) => {
-    setActiveSessionId(id);
-    localStorage.setItem('atmo_session_id', id);
-    const session = sessions.find(s => s.id === id);
-    setMessages(session?.messages || []);
+    setInputValue('');
+    if (window.innerWidth < 768) setIsSidebarOpen(false);
   };
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: inputValue.trim(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
+    const userMessage = { id: Date.now().toString(), role: 'user', content: inputValue };
+    const currentMessages = [...messages, userMessage];
+    setMessages(currentMessages);
+    const question = inputValue;
     setInputValue('');
     setIsLoading(true);
 
     try {
-      const response = await fetch('/ask', {
+      const response = await fetch('http://127.0.0.1:8001/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: userMessage.content,
-          session_id: activeSessionId
-        })
+        body: JSON.stringify({ question, session_id: activeSessionId })
       });
 
-      // Capture Session ID from header
-      const sessionId = response.headers.get('X-Session-ID');
-      if (sessionId) {
-        setActiveSessionId(sessionId);
-        localStorage.setItem('atmo_session_id', sessionId);
-      }
-
-      if (!response.ok) throw new Error('Atmo is having some trouble connecting. Please try again.');
-
       const reader = response.body?.getReader();
-      if (!reader) throw new Error('No stream reader available.');
+      if (!reader) return;
 
-      const decoder = new TextDecoder();
-      let assistantContent = "";
-
-      // Add an empty assistant message to start streaming into
-      const assistantId = (Date.now() + 1).toString();
-      setMessages(prev => [...prev, { id: assistantId, role: 'assistant', content: "" }]);
+      let assistantMessage = { id: (Date.now() + 1).toString(), role: 'assistant', content: '' };
+      setMessages([...currentMessages, assistantMessage]);
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        assistantContent += chunk;
-
-        // Update the last message (which is our assistant message)
-        setMessages(prev => {
-          const newMessages = [...prev];
-          const lastMsg = newMessages[newMessages.length - 1];
-          if (lastMsg && lastMsg.role === 'assistant') {
-            lastMsg.content = assistantContent;
-          }
-          return newMessages;
-        });
+        const chunk = new TextDecoder().decode(value);
+        assistantMessage.content += chunk;
+        setMessages([...currentMessages, { ...assistantMessage }]);
       }
-    } catch (error: any) {
-      console.error("Chat error:", error);
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        role: 'assistant',
-        content: `I hit a snag: ${error.message}`
-      }]);
+
+      fetchSessions();
+    } catch (err) {
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
       handleSendMessage();
     }
   };
 
-  return (
-    <div className="h-screen w-screen overflow-hidden bg-background">
-      {/* Sidebar */}
-      <ChatSidebar
-        isOpen={isSidebarOpen}
-        onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-        onNewChat={handleNewChat}
-        sessions={sessions}
-        activeSessionId={activeSessionId}
-        onSessionSelect={handleSessionSelect}
-        isDarkMode={isDarkMode}
-        onToggleTheme={handleToggleTheme}
-      />
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+  };
 
-      {/* Main Chat Area */}
-      <main
-        className={`h-full transition-all duration-300 ease-in-out ${isSidebarOpen ? 'ml-72' : 'ml-0'
-          } flex flex-col`}
-      >
-        {/* Chat Messages */}
-        <div className="flex-1 overflow-hidden">
+  return (
+    <div className="app-container">
+      <div className="app">
+        {/* Sidebar Overlay (mobile) */}
+        <div
+          className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`}
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+
+        {/* Sidebar */}
+        <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
+          <div className="sidebar-header">
+            <button className="new-chat-btn" onClick={handleNewChat}>
+              <Plus />
+              New chat
+            </button>
+          </div>
+
+          <nav className="sidebar-nav">
+            <div className="nav-item">
+              <Search />
+              Search chats
+            </div>
+          </nav>
+
+          <div className="sidebar-label">Recent</div>
+
+          <div className="sidebar-content">
+            {sessions.map((session) => (
+              <div
+                key={session.id}
+                className={`history-item ${activeSessionId === session.id ? 'active' : ''}`}
+                onClick={() => handleSessionSelect(session.id)}
+              >
+                {session.title}
+              </div>
+            ))}
+            {sessions.length === 0 && (
+              <div className="px-3 py-4 text-xs text-[var(--text-muted)]">No chat history</div>
+            )}
+          </div>
+
+          <div className="sidebar-footer">
+            <div className="user-btn">
+              <div className="user-avatar">U</div>
+              <span className="text-sm font-medium">User</span>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main */}
+        <main className="main">
+          <header className="header">
+            <div className="header-left">
+              <button
+                className="icon-btn"
+                onClick={toggleTheme}
+                title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              >
+                {isDarkMode ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+              </button>
+              <button className="menu-btn" onClick={() => setIsSidebarOpen(true)}>
+                <Menu />
+              </button>
+              <div className="logo">Atm<span>o</span></div>
+            </div>
+            <div className="header-right">
+              <button className="icon-btn">
+                <Bell />
+              </button>
+            </div>
+          </header>
+
+          {/* Messages Area / Welcome View */}
           {messages.length === 0 ? (
-            <WelcomeScreen />
+            <div className="content-area welcome-view">
+              <div className="welcome">
+                <h1>What can I help with?</h1>
+              </div>
+
+              <div className="prompts">
+                <div className="prompt-pill" onClick={() => { setInputValue("What's causing temperature rise?"); setTimeout(handleSendMessage, 10); }}>
+                  <span className="prompt-icon">🌡️</span>
+                  <span className="prompt-text">What's causing temperature rise?</span>
+                </div>
+                <div className="prompt-pill" onClick={() => { setInputValue("How does climate change affect Ghana?"); setTimeout(handleSendMessage, 10); }}>
+                  <span className="prompt-icon">🇬🇭</span>
+                  <span className="prompt-text">Climate change in Ghana</span>
+                </div>
+                <div className="prompt-pill" onClick={() => { setInputValue("Explain the Harmattan season"); setTimeout(handleSendMessage, 10); }}>
+                  <span className="prompt-icon">💨</span>
+                  <span className="prompt-text">Explain Harmattan season</span>
+                </div>
+                <div className="prompt-pill" onClick={() => { setInputValue("How can I reduce my carbon footprint?"); setTimeout(handleSendMessage, 10); }}>
+                  <span className="prompt-icon">🌱</span>
+                  <span className="prompt-text">Reduce carbon footprint</span>
+                </div>
+              </div>
+            </div>
           ) : (
-            <ScrollArea ref={scrollAreaRef} className="h-full">
-              <div className="max-w-4xl mx-auto px-6 py-8">
+            <div className="chat-view active">
+              <div className="messages" ref={scrollAreaRef}>
                 {messages.map((message) => (
-                  <ChatMessage key={message.id} role={message.role} content={message.content} />
+                  <div key={message.id} className={`message ${message.role}`}>
+                    <div className="message-header">
+                      <div className="message-avatar">
+                        {message.role === 'assistant' ? 'A' : 'You'}
+                      </div>
+                      <span className="message-name">
+                        {message.role === 'assistant' ? 'Atmo' : 'You'}
+                      </span>
+                    </div>
+                    <div className="message-text">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+                    </div>
+                  </div>
                 ))}
                 {isLoading && (
-                  <div className="flex gap-4 mb-8">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2d6a4f] to-[#1b4332] dark:from-[#1b4332] dark:to-[#0a0a0a] flex items-center justify-center shadow-lg shadow-[#90e0ef]/20">
-                      <Loader2 className="w-5 h-5 text-white animate-spin" />
+                  <div className="message assistant">
+                    <div className="message-header">
+                      <div className="message-avatar">A</div>
+                      <span className="message-name">Atmo</span>
                     </div>
-                    <div className="flex-1 max-w-3xl">
-                      <div className="rounded-2xl px-5 py-4">
-                        <div className="flex gap-2">
-                          <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '300ms' }} />
-                        </div>
+                    <div className="message-text">
+                      <div className="flex gap-1 pt-2">
+                        <div className="w-1 h-1 rounded-full bg-[var(--text-muted)] animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <div className="w-1 h-1 rounded-full bg-[var(--text-muted)] animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <div className="w-1 h-1 rounded-full bg-[var(--text-muted)] animate-bounce" style={{ animationDelay: '300ms' }} />
                       </div>
                     </div>
                   </div>
                 )}
               </div>
-            </ScrollArea>
+            </div>
           )}
-        </div>
 
-        {/* Input Area - Floating Pill */}
-        <div className="relative pb-6 pt-4">
-          {/* Gradient fade effect above input */}
-          <div className="absolute bottom-full left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent pointer-events-none" />
-
-          <div className="max-w-4xl mx-auto px-6">
-            <div className="relative">
-              {/* Frosted glass effect container */}
-              <div className="absolute inset-0 bg-background/80 dark:bg-background/60 backdrop-blur-xl rounded-[28px] border border-border shadow-2xl shadow-black/10 dark:shadow-black/30" />
-
-              {/* Input content */}
-              <div className="relative flex items-end gap-3 px-5 py-3">
-                <textarea
-                  ref={inputRef}
+          {/* Input */}
+          <div className="input-area">
+            <div className="input-wrapper">
+              <div className="input-pill">
+                <button className="attach-btn">
+                  <Plus />
+                </button>
+                <input
+                  type="text"
+                  placeholder="Ask anything"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ask me about climate science..."
-                  rows={1}
-                  className="flex-1 resize-none bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground min-h-[44px] max-h-[200px] py-3"
                   disabled={isLoading}
                 />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!inputValue.trim() || isLoading}
-                  className="h-11 w-11 rounded-full bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0 shadow-lg shadow-primary/20"
-                  size="icon"
-                >
+                <button className="send-btn" onClick={handleSendMessage} disabled={isLoading || !inputValue.trim()}>
                   {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin text-primary-foreground" />
+                    <Loader2 className="w-4 h-4 animate-spin" color="white" />
                   ) : (
-                    <Send className="w-5 h-5 text-primary-foreground" />
+                    <Send />
                   )}
-                </Button>
+                </button>
               </div>
             </div>
-
-            {/* Disclaimer text */}
-            <p className="text-center text-xs text-muted-foreground mt-3">
-              Atmo is an AI assistant. Always verify important climate information with scientific sources.
-            </p>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

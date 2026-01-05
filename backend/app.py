@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException, Header
 from fastapi.responses import StreamingResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
 from backend.main import get_climate_response
 from backend import database
@@ -52,14 +52,15 @@ async def ask_climate(query: Query):
             full_response = ""
             try:
                 for chunk in response_stream:
-                    full_response += chunk.text
-                    yield chunk.text
+                    # Now response_stream yields strings (markers + text chunks)
+                    full_response += chunk
+                    yield chunk
                 
                 # 5. Save AI response once streaming finishes successfully
                 database.save_message(current_session, "assistant", full_response)
             except Exception as e:
                 # Capture partial response even if it fails mid-stream
-                error_msg = f"[Error mid-stream: {str(e)}]"
+                error_msg = f" [[START_THOUGHT]]Error mid-stream: {str(e)}[[END_THOUGHT]]"
                 database.save_message(current_session, "assistant", full_response + error_msg)
                 yield error_msg
 
@@ -74,3 +75,30 @@ async def ask_climate(query: Query):
         database.save_message(current_session, "error", str(exc))
         raise HTTPException(status_code=500, detail=str(exc))
         
+
+@app.get("/sessions")
+async def get_sessions():
+    """Returns a list of all chat sessions."""
+    return database.get_all_sessions()
+
+@app.get("/history/{session_id}")
+async def get_session_history(session_id: str):
+    """Returns the message history for a specific session."""
+    # Raise limit to 100 to get full conversation
+    history = database.get_history(session_id, limit=100)
+    return history
+
+class SessionUpdate(BaseModel):
+    title: str
+
+@app.patch("/sessions/{session_id}")
+async def update_session(session_id: str, update: SessionUpdate):
+    """Renames a session."""
+    database.rename_session(session_id, update.title)
+    return {"status": "success"}
+
+@app.delete("/sessions/{session_id}")
+async def delete_session(session_id: str):
+    """Deletes a session and its history."""
+    database.delete_session(session_id)
+    return {"status": "success"}
