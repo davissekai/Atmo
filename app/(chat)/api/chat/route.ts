@@ -69,7 +69,8 @@ export async function POST(request: Request) {
   try {
     const json = await request.json();
     requestBody = postRequestBodySchema.parse(json);
-  } catch (_) {
+  } catch (error) {
+    console.error("Zod Parse Error:", error);
     return new ChatSDKError("bad_request:api").toResponse();
   }
 
@@ -79,47 +80,52 @@ export async function POST(request: Request) {
 
     const session = await auth();
 
-    if (!session?.user) {
-      return new ChatSDKError("unauthorized:chat").toResponse();
-    }
+    // Allow anonymous users - they can chat but won't have persistence
+    const isAnonymous = !session?.user;
+    const userType: UserType = session?.user?.type ?? "guest";
 
-    const userType: UserType = session.user.type;
+    // Only check rate limits for authenticated users
+    if (!isAnonymous) {
+      const messageCount = await getMessageCountByUserId({
+        id: session.user.id,
+        differenceInHours: 24,
+      });
 
-    const messageCount = await getMessageCountByUserId({
-      id: session.user.id,
-      differenceInHours: 24,
-    });
-
-    if (messageCount > entitlementsByUserType[userType].maxMessagesPerDay) {
-      return new ChatSDKError("rate_limit:chat").toResponse();
+      if (messageCount > entitlementsByUserType[userType].maxMessagesPerDay) {
+        return new ChatSDKError("rate_limit:chat").toResponse();
+      }
     }
 
     // Check if this is a tool approval flow (all messages sent)
     const isToolApprovalFlow = Boolean(messages);
 
-    const chat = await getChatById({ id });
     let messagesFromDb: DBMessage[] = [];
     let titlePromise: Promise<string> | null = null;
 
-    if (chat) {
-      if (chat.userId !== session.user.id) {
-        return new ChatSDKError("forbidden:chat").toResponse();
-      }
-      // Only fetch messages if chat already exists and not tool approval
-      if (!isToolApprovalFlow) {
-        messagesFromDb = await getMessagesByChatId({ id });
-      }
-    } else if (message?.role === "user") {
-      // Save chat immediately with placeholder title
-      await saveChat({
-        id,
-        userId: session.user.id,
-        title: "New chat",
-        visibility: selectedVisibilityType,
-      });
+    // Only do database operations for authenticated users
+    if (!isAnonymous) {
+      const chat = await getChatById({ id });
 
-      // Start title generation in parallel (don't await)
-      titlePromise = generateTitleFromUserMessage({ message });
+      if (chat) {
+        if (chat.userId !== session.user.id) {
+          return new ChatSDKError("forbidden:chat").toResponse();
+        }
+        // Only fetch messages if chat already exists and not tool approval
+        if (!isToolApprovalFlow) {
+          messagesFromDb = await getMessagesByChatId({ id });
+        }
+      } else if (message?.role === "user") {
+        // Save chat immediately with placeholder title
+        await saveChat({
+          id,
+          userId: session.user.id,
+          title: "New chat",
+          visibility: selectedVisibilityType,
+        });
+
+        // Start title generation in parallel (don't await)
+        titlePromise = generateTitleFromUserMessage({ message });
+      }
     }
 
     // Use all messages for tool approval, otherwise DB messages + new message
@@ -136,8 +142,8 @@ export async function POST(request: Request) {
       country,
     };
 
-    // Only save user messages to the database (not tool approval responses)
-    if (message?.role === "user") {
+    // Only save user messages to the database for authenticated users
+    if (!isAnonymous && message?.role === "user") {
       await saveMessages({
         messages: [
           {
@@ -153,7 +159,10 @@ export async function POST(request: Request) {
     }
 
     const streamId = generateUUID();
-    await createStreamId({ streamId, chatId: id });
+    // Only create stream ID record for authenticated users
+    if (!isAnonymous) {
+      await createStreamId({ streamId, chatId: id });
+    }
 
     const stream = createUIMessageStream({
       // Pass original messages for tool approval continuation
@@ -180,9 +189,7 @@ export async function POST(request: Request) {
             ? []
             : [
                 "getWeather",
-                "createDocument",
-                "updateDocument",
-                "requestSuggestions",
+                // Document tools disabled for now - text responses only
               ],
           experimental_transform: isReasoningModel
             ? undefined
@@ -196,12 +203,7 @@ export async function POST(request: Request) {
             : undefined,
           tools: {
             getWeather,
-            createDocument: createDocument({ session, dataStream }),
-            updateDocument: updateDocument({ session, dataStream }),
-            requestSuggestions: requestSuggestions({
-              session,
-              dataStream,
-            }),
+            // Document tools disabled for now
           },
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
@@ -219,6 +221,9 @@ export async function POST(request: Request) {
       },
       generateId: generateUUID,
       onFinish: async ({ messages: finishedMessages }) => {
+        // Skip database operations for anonymous users
+        if (isAnonymous) return;
+
         if (isToolApprovalFlow) {
           // For tool approval, update existing messages (tool state changed) and save new ones
           for (const finishedMsg of finishedMessages) {

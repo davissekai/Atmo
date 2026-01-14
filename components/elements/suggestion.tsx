@@ -40,7 +40,8 @@ export const Suggestion = ({
 
   return (
     <Button
-      className={cn("cursor-pointer rounded-full px-4", className)}
+      className={cn("cursor-pointer rounded-2xl px-4", className)}
+      data-testid="suggestion"
       onClick={handleClick}
       size={size}
       type="button"

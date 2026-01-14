@@ -42,3 +42,15 @@ yarn-error.log*
 /playwright-report/
 /blob-report/
 /playwright/*
+
+# Agent/AI tools
+.agent/
+.claude/
+.shared/
+
+# Legacy/backup
+legacy_backup/
+
+# Session/diagnostic files
+SESSION_MEMORY.md
+*.Diagnostic*.md

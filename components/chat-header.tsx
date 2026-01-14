@@ -1,14 +1,55 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { memo } from "react";
-import { useWindowSize } from "usehooks-ts";
+import { useTheme } from "next-themes";
 import { SidebarToggle } from "@/components/sidebar-toggle";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, VercelIcon } from "./icons";
-import { useSidebar } from "./ui/sidebar";
-import { VisibilitySelector, type VisibilityType } from "./visibility-selector";
+import { AtmoLogo } from "./icons";
+
+// Simple Sun and Moon icons
+function SunIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2" />
+      <path d="M12 20v2" />
+      <path d="m4.93 4.93 1.41 1.41" />
+      <path d="m17.66 17.66 1.41 1.41" />
+      <path d="M2 12h2" />
+      <path d="M20 12h2" />
+      <path d="m6.34 17.66-1.41 1.41" />
+      <path d="m19.07 4.93-1.41 1.41" />
+    </svg>
+  );
+}
+
+function MoonIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+    </svg>
+  );
+}
 
 function PureChatHeader({
   chatId,
@@ -16,52 +57,28 @@ function PureChatHeader({
   isReadonly,
 }: {
   chatId: string;
-  selectedVisibilityType: VisibilityType;
+  selectedVisibilityType: string;
   isReadonly: boolean;
 }) {
-  const router = useRouter();
-  const { open } = useSidebar();
-
-  const { width: windowWidth } = useWindowSize();
+  const { setTheme, resolvedTheme } = useTheme();
 
   return (
     <header className="sticky top-0 flex items-center gap-2 bg-background px-2 py-1.5 md:px-2">
       <SidebarToggle />
 
-      {(!open || windowWidth < 768) && (
-        <Button
-          className="order-2 ml-auto h-8 px-2 md:order-1 md:ml-0 md:h-fit md:px-2"
-          onClick={() => {
-            router.push("/");
-            router.refresh();
-          }}
-          variant="outline"
-        >
-          <PlusIcon />
-          <span className="md:sr-only">New Chat</span>
-        </Button>
-      )}
-
-      {!isReadonly && (
-        <VisibilitySelector
-          chatId={chatId}
-          className="order-1 md:order-2"
-          selectedVisibilityType={selectedVisibilityType}
-        />
-      )}
+      <div className="atmo-logo-container">
+        <AtmoLogo size={42} />
+        <span className="text-xl font-bold tracking-tight">Atmo</span>
+      </div>
 
       <Button
-        asChild
-        className="order-3 hidden bg-zinc-900 px-2 text-zinc-50 hover:bg-zinc-800 md:ml-auto md:flex md:h-fit dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+        className="order-3 ml-auto size-9 rounded-full"
+        variant="ghost"
+        size="icon"
+        onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+        aria-label="Toggle theme"
       >
-        <Link
-          href={"https://vercel.com/templates/next.js/nextjs-ai-chatbot"}
-          rel="noreferrer"
-          target="_noblank"
-        >
-          <VercelIcon size={16} />
-          Deploy with Vercel
-        </Link>
+        {resolvedTheme === "dark" ? <SunIcon /> : <MoonIcon />}
       </Button>
     </header>
   );
@@ -74,3 +91,4 @@ export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) => {
     prevProps.isReadonly === nextProps.isReadonly
   );
 });
+

@@ -1,203 +1,82 @@
-import Image from "next/image";
-import type { ComponentProps, ReactNode } from "react";
+"use client";
+
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import type { ComponentPropsWithoutRef, HTMLAttributes } from "react";
 import {
   Command,
-  CommandDialog,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
-  CommandShortcut,
 } from "@/components/ui/command";
 import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  BoxIcon,
+  LogoAnthropic,
+  LogoGoogle,
+  LogoOpenAI,
+} from "@/components/icons";
 import { cn } from "@/lib/utils";
 
-export type ModelSelectorProps = ComponentProps<typeof Dialog>;
+const ModelSelector = DialogPrimitive.Root;
+const ModelSelectorTrigger = DialogPrimitive.Trigger;
 
-export const ModelSelector = (props: ModelSelectorProps) => (
-  <Dialog {...props} />
-);
-
-export type ModelSelectorTriggerProps = ComponentProps<typeof DialogTrigger>;
-
-export const ModelSelectorTrigger = (props: ModelSelectorTriggerProps) => (
-  <DialogTrigger {...props} />
-);
-
-export type ModelSelectorContentProps = ComponentProps<typeof DialogContent> & {
-  title?: ReactNode;
-};
-
-export const ModelSelectorContent = ({
+const ModelSelectorContent = ({
   className,
   children,
-  title = "Model Selector",
   ...props
-}: ModelSelectorContentProps) => (
-  <DialogContent className={cn("p-0", className)} {...props}>
-    <DialogTitle className="sr-only">{title}</DialogTitle>
-    <Command className="**:data-[slot=command-input-wrapper]:h-auto">
-      {children}
-    </Command>
-  </DialogContent>
+}: ComponentPropsWithoutRef<typeof DialogPrimitive.Content>) => (
+  <DialogPrimitive.Portal>
+    <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/30 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+    <DialogPrimitive.Content
+      className={cn(
+        "fixed left-[50%] top-[50%] z-50 w-full max-w-sm translate-x-[-50%] translate-y-[-50%] rounded-lg border bg-popover text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+        className
+      )}
+      {...props}
+    >
+      <DialogPrimitive.Title className="sr-only">
+        Select AI Model
+      </DialogPrimitive.Title>
+      <Command className="h-full w-full">
+        {children}
+      </Command>
+    </DialogPrimitive.Content>
+  </DialogPrimitive.Portal>
 );
 
-export type ModelSelectorDialogProps = ComponentProps<typeof CommandDialog>;
+const ModelSelectorInput = CommandInput;
+const ModelSelectorList = CommandList;
+const ModelSelectorGroup = CommandGroup;
+const ModelSelectorItem = CommandItem;
 
-export const ModelSelectorDialog = (props: ModelSelectorDialogProps) => (
-  <CommandDialog {...props} />
-);
-
-export type ModelSelectorInputProps = ComponentProps<typeof CommandInput>;
-
-export const ModelSelectorInput = ({
+const ModelSelectorName = ({
   className,
   ...props
-}: ModelSelectorInputProps) => (
-  <CommandInput className={cn("h-auto py-3.5", className)} {...props} />
+}: HTMLAttributes<HTMLSpanElement>) => (
+  <span className={cn("truncate text-sm", className)} {...props} />
 );
 
-export type ModelSelectorListProps = ComponentProps<typeof CommandList>;
-
-export const ModelSelectorList = (props: ModelSelectorListProps) => (
-  <CommandList {...props} />
-);
-
-export type ModelSelectorEmptyProps = ComponentProps<typeof CommandEmpty>;
-
-export const ModelSelectorEmpty = (props: ModelSelectorEmptyProps) => (
-  <CommandEmpty {...props} />
-);
-
-export type ModelSelectorGroupProps = ComponentProps<typeof CommandGroup>;
-
-export const ModelSelectorGroup = (props: ModelSelectorGroupProps) => (
-  <CommandGroup {...props} />
-);
-
-export type ModelSelectorItemProps = ComponentProps<typeof CommandItem>;
-
-export const ModelSelectorItem = (props: ModelSelectorItemProps) => (
-  <CommandItem {...props} />
-);
-
-export type ModelSelectorShortcutProps = ComponentProps<typeof CommandShortcut>;
-
-export const ModelSelectorShortcut = (props: ModelSelectorShortcutProps) => (
-  <CommandShortcut {...props} />
-);
-
-export type ModelSelectorSeparatorProps = ComponentProps<
-  typeof CommandSeparator
->;
-
-export const ModelSelectorSeparator = (props: ModelSelectorSeparatorProps) => (
-  <CommandSeparator {...props} />
-);
-
-export type ModelSelectorLogoProps = {
-  className?: string;
-  provider:
-    | "moonshotai-cn"
-    | "lucidquery"
-    | "moonshotai"
-    | "zai-coding-plan"
-    | "alibaba"
-    | "xai"
-    | "vultr"
-    | "nvidia"
-    | "upstage"
-    | "groq"
-    | "github-copilot"
-    | "mistral"
-    | "vercel"
-    | "nebius"
-    | "deepseek"
-    | "alibaba-cn"
-    | "google-vertex-anthropic"
-    | "venice"
-    | "chutes"
-    | "cortecs"
-    | "github-models"
-    | "togetherai"
-    | "azure"
-    | "baseten"
-    | "huggingface"
-    | "opencode"
-    | "fastrouter"
-    | "google"
-    | "google-vertex"
-    | "cloudflare-workers-ai"
-    | "inception"
-    | "wandb"
-    | "openai"
-    | "zhipuai-coding-plan"
-    | "perplexity"
-    | "openrouter"
-    | "zenmux"
-    | "v0"
-    | "iflowcn"
-    | "synthetic"
-    | "deepinfra"
-    | "zhipuai"
-    | "submodel"
-    | "zai"
-    | "inference"
-    | "requesty"
-    | "morph"
-    | "lmstudio"
-    | "anthropic"
-    | "aihubmix"
-    | "fireworks-ai"
-    | "modelscope"
-    | "llama"
-    | "scaleway"
-    | "amazon-bedrock"
-    | "cerebras"
-    | (string & {});
+const ModelSelectorLogo = ({ provider }: { provider: string }) => {
+  switch (provider) {
+    case "openai":
+      return <LogoOpenAI size={16} />;
+    case "google":
+      return <LogoGoogle size={16} />;
+    case "anthropic":
+      return <LogoAnthropic />;
+    default:
+      return <BoxIcon size={16} />;
+  }
 };
 
-export const ModelSelectorLogo = ({
-  provider,
-  className,
-}: ModelSelectorLogoProps) => (
-  <Image
-    alt={`${provider} logo`}
-    className={cn("size-3 dark:invert", className)}
-    height={12}
-    src={`https://models.dev/logos/${provider}.svg`}
-    unoptimized
-    width={12}
-  />
-);
-
-export type ModelSelectorLogoGroupProps = ComponentProps<"div">;
-
-export const ModelSelectorLogoGroup = ({
-  className,
-  ...props
-}: ModelSelectorLogoGroupProps) => (
-  <div
-    className={cn(
-      "-space-x-1 flex shrink-0 items-center [&>img]:rounded-full [&>img]:bg-background [&>img]:p-px [&>img]:ring-1 dark:[&>img]:bg-foreground",
-      className
-    )}
-    {...props}
-  />
-);
-
-export type ModelSelectorNameProps = ComponentProps<"span">;
-
-export const ModelSelectorName = ({
-  className,
-  ...props
-}: ModelSelectorNameProps) => (
-  <span className={cn("flex-1 truncate text-left", className)} {...props} />
-);
+export {
+  ModelSelector,
+  ModelSelectorTrigger,
+  ModelSelectorContent,
+  ModelSelectorInput,
+  ModelSelectorList,
+  ModelSelectorGroup,
+  ModelSelectorItem,
+  ModelSelectorLogo,
+  ModelSelectorName,
+};

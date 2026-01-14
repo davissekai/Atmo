@@ -1,62 +1,28 @@
-import { gateway } from "@ai-sdk/gateway";
-import {
-  customProvider,
-  extractReasoningMiddleware,
-  wrapLanguageModel,
-} from "ai";
+import { google } from "@ai-sdk/google";
 import { isTestEnvironment } from "../constants";
 
-const THINKING_SUFFIX_REGEX = /-thinking$/;
-
-export const myProvider = isTestEnvironment
-  ? (() => {
-      const {
-        artifactModel,
-        chatModel,
-        reasoningModel,
-        titleModel,
-      } = require("./models.mock");
-      return customProvider({
-        languageModels: {
-          "chat-model": chatModel,
-          "chat-model-reasoning": reasoningModel,
-          "title-model": titleModel,
-          "artifact-model": artifactModel,
-        },
-      });
-    })()
-  : null;
+export const myProvider = null; // Removed mock logic for simplicity, or keep if needed but unused
 
 export function getLanguageModel(modelId: string) {
-  if (isTestEnvironment && myProvider) {
-    return myProvider.languageModel(modelId);
+  // Simple pass-through for now. 
+  // If modelId starts with 'google/', strip it because the SDK might expect just the model name 
+  // OR the SDK handles "google/gemini..." correctly. 
+  // Actually, @ai-sdk/google exports a `google` object where you call `google('model-name')`.
+  // The modelId from models.ts is "google/gemini-1.5-flash". 
+  
+  if (modelId.startsWith("google/")) {
+    const cleanId = modelId.replace("google/", "");
+    return google(cleanId);
   }
-
-  const isReasoningModel =
-    modelId.includes("reasoning") || modelId.endsWith("-thinking");
-
-  if (isReasoningModel) {
-    const gatewayModelId = modelId.replace(THINKING_SUFFIX_REGEX, "");
-
-    return wrapLanguageModel({
-      model: gateway.languageModel(gatewayModelId),
-      middleware: extractReasoningMiddleware({ tagName: "thinking" }),
-    });
-  }
-
-  return gateway.languageModel(modelId);
+  
+  // Fallback or error if other providers are selected but not configured
+  throw new Error(`Provider for ${modelId} not configured`);
 }
 
 export function getTitleModel() {
-  if (isTestEnvironment && myProvider) {
-    return myProvider.languageModel("title-model");
-  }
-  return gateway.languageModel("anthropic/claude-haiku-4.5");
+  return google("gemini-3-flash-preview");
 }
 
 export function getArtifactModel() {
-  if (isTestEnvironment && myProvider) {
-    return myProvider.languageModel("artifact-model");
-  }
-  return gateway.languageModel("anthropic/claude-haiku-4.5");
+  return google("gemini-3-flash-preview");
 }

@@ -316,3 +316,109 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* --- Atmo Custom Styles --- */
+
+.earth-bg {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2672&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  transition: all 0.8s ease-in-out;
+  color: var(--foreground) !important;
+}
+
+.earth-bg * {
+  /* text-shadow removed */
+}
+
+/* Ensure suggested actions look good on the background */
+/* Stronger selector for suggestion buttons - target data-testid directly */
+.earth-bg [data-testid="suggested-actions"] button,
+.earth-bg [data-testid="suggested-actions"] [data-testid="suggestion"],
+.earth-bg button[data-testid="suggestion"] {
+  background-color: color-mix(in oklab, var(--background) 85%, transparent) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid color-mix(in oklab, var(--foreground) 20%, transparent) !important;
+  color: var(--foreground) !important;
+}
+
+.earth-bg [data-testid="suggested-actions"] button:hover,
+.earth-bg button[data-testid="suggestion"]:hover {
+  background-color: color-mix(in oklab, var(--background) 70%, transparent) !important;
+  border-color: color-mix(in oklab, var(--foreground) 35%, transparent) !important;
+}
+
+/* Fix Input box in Earth mode */
+.earth-bg .rounded-xl.bg-background {
+  background-color: color-mix(in oklab, var(--background) 70%, transparent) !important;
+  backdrop-filter: blur(10px);
+  border-color: color-mix(in oklab, var(--foreground) 20%, transparent) !important;
+}
+
+.earth-bg textarea {
+  color: var(--foreground) !important;
+  caret-color: var(--foreground);
+}
+
+.earth-bg textarea::placeholder {
+  color: color-mix(in oklab, var(--foreground) 60%, transparent) !important;
+}
+
+.dark .earth-bg {
+  color: white !important;
+}
+
+.dark .earth-bg [data-testid="suggested-actions"] button,
+.dark .earth-bg [data-testid="suggested-actions"] [data-testid="suggestion"],
+.dark .earth-bg button[data-testid="suggestion"] {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  color: white !important;
+}
+
+.dark .earth-bg [data-testid="suggested-actions"] button:hover,
+.dark .earth-bg button[data-testid="suggestion"]:hover {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.dark .earth-bg .rounded-xl.bg-background {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.dark .earth-bg textarea {
+  color: white !important;
+  caret-color: white;
+}
+
+.dark .earth-bg textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.atmo-logo-container {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.atmo-logo-container svg {
+  height: 42px; /* Adjusted base height */
+  width: auto;
+}
+
+/* Adjust header to allow centering */
+header {
+  position: relative;
+  justify-content: space-between;
+}
+
+/* Smooth theme transitions */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}

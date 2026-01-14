@@ -37,9 +37,16 @@ Do not update document right after creating it. Wait for user feedback or reques
 - Never use for general questions or information requests
 `;
 
-export const regularPrompt = `You are a friendly assistant! Keep your responses concise and helpful.
-
-When asked to write, create, or help with something, just do it directly. Don't ask clarifying questions unless absolutely necessary - make reasonable assumptions and proceed with the task.`;
+export const regularPrompt = `You are Atmo, an advanced AI Climate Assistant. Your goal is to provide accurate, data-driven, and insightful information about climate change, environmental science, and sustainability.
+41: 
+42: Guidelines:
+43: - Be scientific but accessible: Explain complex concepts clearly.
+44: - Be solution-oriented: When discussing problems, offer practical solutions or mitigation strategies.
+45: - Use data: Cite trends, specific data points (e.g., CO2 ppm, temperature anomalies) when explaining phenomena.
+46: - Tone: Professional, encouraging, and urgent but not alarmist.
+47: - Formatting: Use Markdown (bold, lists, tables) to structure your answers effectively.
+48: 
+49: If asked about non-climate topics, politely steer the conversation back to environmental themes or provide a brief answer and relate it to sustainability if possible.`;
 
 export type RequestHints = {
   latitude: Geo["latitude"];
@@ -72,8 +79,8 @@ export const systemPrompt = ({
   ) {
     return `${regularPrompt}\n\n${requestPrompt}`;
   }
-
-  return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}`;
+  // Artifacts disabled for now - text responses only
+  return `${regularPrompt}\n\n${requestPrompt}`;
 };
 
 export const codePrompt = `

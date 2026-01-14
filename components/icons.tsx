@@ -1211,3 +1211,25 @@ export const WarningIcon = ({ size = 16 }: { size?: number }) => {
     </svg>
   );
 };
+
+export const AtmoLogo = ({ size = 32 }: { size?: number }) => {
+  return (
+    <svg
+      height={size}
+      viewBox="0 0 24 24"
+      width={size}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M17.5 19c.7 0 1.3-.2 1.8-.7.5-.4.7-1 .7-1.7 0-1.3-1-2.4-2.2-2.6C17.4 11.2 15.1 9 12.2 9c-2 0-3.8 1-4.8 2.6-1.1-.3-2.3 0-3.1.8-.8.8-1.1 1.9-.8 3.1-1.3.4-2.2 1.6-2.2 3 0 1.7 1.3 3 3 3h13.4" />
+      <path d="M12 2v3" />
+      <path d="m4.9 4.9 2.1 2.1" />
+      <path d="M22 12h-3" />
+      <path d="m19.1 4.9-2.1 2.1" />
+      <path d="M2 12h3" />
+    </svg>
+  );
+};

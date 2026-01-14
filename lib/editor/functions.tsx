@@ -1,5 +1,6 @@
 "use client";
 
+import DOMPurify from "dompurify";
 import { defaultMarkdownSerializer } from "prosemirror-markdown";
 import { DOMParser, type Node } from "prosemirror-model";
 import { Decoration, DecorationSet, type EditorView } from "prosemirror-view";
@@ -14,7 +15,8 @@ export const buildDocumentFromContent = (content: string) => {
   const parser = DOMParser.fromSchema(documentSchema);
   const stringFromMarkdown = renderToString(<Response>{content}</Response>);
   const tempContainer = document.createElement("div");
-  tempContainer.innerHTML = stringFromMarkdown;
+  // Sanitize HTML to prevent XSS from LLM-generated content
+  tempContainer.innerHTML = DOMPurify.sanitize(stringFromMarkdown);
   return parser.parse(tempContainer);
 };
 
