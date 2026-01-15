@@ -1,71 +1,79 @@
-<a href="https://chat.vercel.ai/">
-  <img alt="Next.js 14 and App Router-ready AI chatbot." src="app/(chat)/opengraph-image.png">
-  <h1 align="center">Chat SDK</h1>
-</a>
+<h1 align="center">🌿 Atmo - Climate Science Assistant</h1>
 
 <p align="center">
-    Chat SDK is a free, open-source template built with Next.js and the AI SDK that helps you quickly build powerful chatbot applications.
+  <strong>AI-powered climate assistant for environmental insights and sustainability guidance</strong>
 </p>
 
 <p align="center">
-  <a href="https://chat-sdk.dev"><strong>Read Docs</strong></a> ·
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#model-providers"><strong>Model Providers</strong></a> ·
-  <a href="#deploy-your-own"><strong>Deploy Your Own</strong></a> ·
-  <a href="#running-locally"><strong>Running locally</strong></a>
+  Atmo is an intelligent climate assistant built with Next.js and Google Gemini 3. Ask questions about climate change, carbon footprints, emission factors, renewable energy, and sustainability practices.
 </p>
+
 <br/>
 
-## Features
+## ✨ Features
 
-- [Next.js](https://nextjs.org) App Router
-  - Advanced routing for seamless navigation and performance
-  - React Server Components (RSCs) and Server Actions for server-side rendering and increased performance
-- [AI SDK](https://ai-sdk.dev/docs/introduction)
-  - Unified API for generating text, structured objects, and tool calls with LLMs
-  - Hooks for building dynamic chat and generative user interfaces
-  - Supports xAI (default), OpenAI, Fireworks, and other model providers
-- [shadcn/ui](https://ui.shadcn.com)
-  - Styling with [Tailwind CSS](https://tailwindcss.com)
-  - Component primitives from [Radix UI](https://radix-ui.com) for accessibility and flexibility
-- Data Persistence
-  - [Neon Serverless Postgres](https://vercel.com/marketplace/neon) for saving chat history and user data
-  - [Vercel Blob](https://vercel.com/storage/blob) for efficient file storage
-- [Auth.js](https://authjs.dev)
-  - Simple and secure authentication
+- **Climate-Focused AI** - Specialized responses on environmental science, carbon accounting, and sustainability
+- **No Login Required** - Start chatting immediately without creating an account
+- **Real-time Weather** - Get current weather data for any location
+- **Dark/Light Mode** - Toggle between themes for comfortable viewing
+- **Mobile Responsive** - Works seamlessly on desktop and mobile devices
 
-## Model Providers
+## 🛠️ Tech Stack
 
-This template uses the [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) to access multiple AI models through a unified interface. The default configuration includes [xAI](https://x.ai) models (`grok-2-vision-1212`, `grok-3-mini`) routed through the gateway.
+- **Frontend**: [Next.js 16](https://nextjs.org) with App Router
+- **AI**: [Google Gemini 3](https://ai.google.dev/) via [AI SDK](https://ai-sdk.dev)
+- **UI**: [shadcn/ui](https://ui.shadcn.com) + [Tailwind CSS](https://tailwindcss.com)
+- **Database**: PostgreSQL with [Drizzle ORM](https://orm.drizzle.team)
+- **Auth**: [Auth.js](https://authjs.dev) (optional)
 
-### AI Gateway Authentication
+## 🚀 Getting Started
 
-**For Vercel deployments**: Authentication is handled automatically via OIDC tokens.
+### Prerequisites
 
-**For non-Vercel deployments**: You need to provide an AI Gateway API key by setting the `AI_GATEWAY_API_KEY` environment variable in your `.env.local` file.
+- Node.js 18+
+- PostgreSQL database
+- Google AI API key
 
-With the [AI SDK](https://ai-sdk.dev/docs/introduction), you can also switch to direct LLM providers like [OpenAI](https://openai.com), [Anthropic](https://anthropic.com), [Cohere](https://cohere.com/), and [many more](https://ai-sdk.dev/providers/ai-sdk-providers) with just a few lines of code.
+### Environment Variables
 
-## Deploy Your Own
+Create a `.env.local` file with:
 
-You can deploy your own version of the Next.js AI Chatbot to Vercel with one click:
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/templates/next.js/nextjs-ai-chatbot)
-
-## Running locally
-
-You will need to use the environment variables [defined in `.env.example`](.env.example) to run Next.js AI Chatbot. It's recommended you use [Vercel Environment Variables](https://vercel.com/docs/projects/environment-variables) for this, but a `.env` file is all that is necessary.
-
-> Note: You should not commit your `.env` file or it will expose secrets that will allow others to control access to your various AI and authentication provider accounts.
-
-1. Install Vercel CLI: `npm i -g vercel`
-2. Link local instance with Vercel and GitHub accounts (creates `.vercel` directory): `vercel link`
-3. Download your environment variables: `vercel env pull`
-
-```bash
-pnpm install
-pnpm db:migrate # Setup database or apply latest database changes
-pnpm dev
+```env
+GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_api_key
+POSTGRES_URL=your_database_url
+AUTH_SECRET=your_auth_secret
 ```
 
-Your app template should now be running on [localhost:3000](http://localhost:3000).
+### Installation
+
+```bash
+# Install dependencies
+npm install
+
+# Run database migrations
+npm run db:migrate
+
+# Start development server
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to start chatting with Atmo.
+
+## 🌍 What Can Atmo Help With?
+
+- **Climate Science** - Understanding greenhouse gases, carbon cycles, and climate models
+- **Carbon Footprints** - Calculating and reducing personal/corporate emissions
+- **Emission Factors** - Data on energy, transportation, and industrial emissions
+- **Sustainability** - Best practices for individuals and organizations
+- **Renewable Energy** - Solar, wind, hydro, and other clean energy sources
+- **Climate Policy** - Paris Agreement, carbon pricing, and regulations
+
+## 📄 License
+
+MIT License - feel free to use and modify for your own projects.
+
+---
+
+<p align="center">
+  Built with 💚 for a sustainable future
+</p>
