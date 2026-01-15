@@ -271,7 +271,8 @@ export async function POST(request: Request) {
 
     const streamContext = getStreamContext();
 
-    if (streamContext) {
+    // Only use resumable streams for authenticated users (anonymous users don't have streamId saved)
+    if (streamContext && !isAnonymous) {
       try {
         const resumableStream = await streamContext.resumableStream(
           streamId,
