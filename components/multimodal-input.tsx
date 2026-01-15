@@ -89,7 +89,7 @@ function PureMultimodalInput({
 
   const adjustHeight = useCallback(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = "44px";
+      textareaRef.current.style.height = "36px";
     }
   }, []);
 
@@ -112,7 +112,7 @@ function PureMultimodalInput({
 
   const resetHeight = useCallback(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = "44px";
+      textareaRef.current.style.height = "36px";
     }
   }, []);
 
@@ -366,7 +366,7 @@ function PureMultimodalInput({
             data-testid="multimodal-input"
             disableAutoResize={true}
             maxHeight={200}
-            minHeight={44}
+            minHeight={36}
             onChange={handleInput}
             placeholder="Ask Atmo anything"
             ref={textareaRef}
@@ -375,12 +375,7 @@ function PureMultimodalInput({
           />
         </div>
         <PromptInputToolbar className="border-top-0! border-t-0! p-0 shadow-none dark:border-0 dark:border-transparent!">
-          <PromptInputTools className="gap-0 sm:gap-0.5">
-            <AttachmentsButton
-              fileInputRef={fileInputRef}
-              selectedModelId={selectedModelId}
-              status={status}
-            />
+          <PromptInputTools className="gap-0">
             <ModelSelectorCompact
               onModelChange={onModelChange}
               selectedModelId={selectedModelId}
@@ -485,7 +480,7 @@ function PureModelSelectorCompact({
   return (
     <ModelSelector onOpenChange={setOpen} open={open}>
       <ModelSelectorTrigger asChild>
-        <Button className="h-8 w-[200px] justify-between px-2" variant="ghost">
+        <Button className="h-8 gap-1 px-2" variant="ghost">
           {provider && <ModelSelectorLogo provider={provider} />}
           <ModelSelectorName>{selectedModel.name}</ModelSelectorName>
         </Button>

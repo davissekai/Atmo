@@ -1,4 +1,3 @@
-import { geolocation } from "@vercel/functions";
 import {
   convertToModelMessages,
   createUIMessageStream,
@@ -14,12 +13,8 @@ import {
 } from "resumable-stream";
 import { auth, type UserType } from "@/app/(auth)/auth";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
-import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
+import { systemPrompt } from "@/lib/ai/prompts";
 import { getLanguageModel } from "@/lib/ai/providers";
-import { createDocument } from "@/lib/ai/tools/create-document";
-import { getWeather } from "@/lib/ai/tools/get-weather";
-import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
-import { updateDocument } from "@/lib/ai/tools/update-document";
 import { isProductionEnvironment } from "@/lib/constants";
 import {
   createStreamId,
@@ -133,15 +128,6 @@ export async function POST(request: Request) {
       ? (messages as ChatMessage[])
       : [...convertToUIMessages(messagesFromDb), message as ChatMessage];
 
-    const { longitude, latitude, city, country } = geolocation(request);
-
-    const requestHints: RequestHints = {
-      longitude,
-      latitude,
-      city,
-      country,
-    };
-
     // Only save user messages to the database for authenticated users
     if (!isAnonymous && message?.role === "user") {
       await saveMessages({
@@ -182,15 +168,9 @@ export async function POST(request: Request) {
 
         const result = streamText({
           model: getLanguageModel(selectedChatModel),
-          system: systemPrompt({ selectedChatModel, requestHints }),
+          system: systemPrompt({ selectedChatModel }),
           messages: await convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
-          experimental_activeTools: isReasoningModel
-            ? []
-            : [
-                "getWeather",
-                // Document tools disabled for now - text responses only
-              ],
           experimental_transform: isReasoningModel
             ? undefined
             : smoothStream({ chunking: "word", delayInMs: null }),
@@ -201,10 +181,6 @@ export async function POST(request: Request) {
                 },
               }
             : undefined,
-          tools: {
-            getWeather,
-            // Document tools disabled for now
-          },
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
             functionId: "stream-text",
