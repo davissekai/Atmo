@@ -193,7 +193,7 @@ export async function POST(request: Request) {
               ],
           experimental_transform: isReasoningModel
             ? undefined
-            : smoothStream({ chunking: "word" }),
+            : smoothStream({ chunking: "word", delayInMs: null }),
           providerOptions: isReasoningModel
             ? {
                 anthropic: {
