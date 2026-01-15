@@ -279,14 +279,22 @@ export async function POST(request: Request) {
           () => stream.pipeThrough(new JsonToSseTransformStream())
         );
         if (resumableStream) {
-          return new Response(resumableStream);
+          return new Response(resumableStream, {
+            headers: {
+              'Content-Encoding': 'none',
+            },
+          });
         }
       } catch (error) {
         console.error("Failed to create resumable stream:", error);
       }
     }
 
-    return new Response(stream.pipeThrough(new JsonToSseTransformStream()));
+    return new Response(stream.pipeThrough(new JsonToSseTransformStream()), {
+      headers: {
+        'Content-Encoding': 'none',
+      },
+    });
   } catch (error) {
     const vercelId = request.headers.get("x-vercel-id");
 
