@@ -58,6 +58,26 @@ export function getStreamContext() {
   return globalStreamContext;
 }
 
+// "Bypass Architecture" - Fast Lane for Anonymous Users
+async function handleAnonymousChat(body: PostRequestBody) {
+  const { messages, selectedChatModel } = body;
+
+  const result = streamText({
+    model: getLanguageModel(selectedChatModel),
+    system: systemPrompt({ selectedChatModel }),
+    messages: await convertToModelMessages(messages),
+    // Bypass: No smoothStream (adds delay), no tool approval, no DB
+  });
+
+  return result.toDataStreamResponse({
+    headers: {
+      "Content-Encoding": "none", // Prevent Vercel/Proxy buffering
+      "X-Accel-Buffering": "no",
+      "Cache-Control": "no-cache, no-transform",
+    },
+  });
+}
+
 export async function POST(request: Request) {
   let requestBody: PostRequestBody;
 
@@ -77,6 +97,12 @@ export async function POST(request: Request) {
 
     // Allow anonymous users - they can chat but won't have persistence
     const isAnonymous = !session?.user;
+    
+    // FAST LANE: Bypass complex logic for anonymous users
+    if (isAnonymous) {
+      return await handleAnonymousChat(requestBody);
+    }
+    
     const userType: UserType = session?.user?.type ?? "guest";
 
     // Only check rate limits for authenticated users
