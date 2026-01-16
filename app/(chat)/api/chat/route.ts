@@ -68,7 +68,8 @@ async function handleAnonymousChat(body: PostRequestBody) {
   const result = streamText({
     model: getLanguageModel(selectedChatModel),
     system: systemPrompt({ selectedChatModel }),
-    messages: await convertToModelMessages(chatMessages),
+    // Cast needed: Zod schema types don't match AI SDK UIMessage in beta
+    messages: await convertToModelMessages(chatMessages as any),
     // Bypass: No smoothStream (adds delay), no tool approval, no DB
   });
 
