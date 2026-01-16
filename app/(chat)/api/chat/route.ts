@@ -60,12 +60,15 @@ export function getStreamContext() {
 
 // "Bypass Architecture" - Fast Lane for Anonymous Users
 async function handleAnonymousChat(body: PostRequestBody) {
-  const { messages, selectedChatModel } = body;
+  const { message, messages, selectedChatModel } = body;
+
+  // Use messages array if provided (multi-turn), otherwise wrap single message
+  const chatMessages = messages ?? (message ? [message] : []);
 
   const result = streamText({
     model: getLanguageModel(selectedChatModel),
     system: systemPrompt({ selectedChatModel }),
-    messages: await convertToModelMessages(messages),
+    messages: await convertToModelMessages(chatMessages),
     // Bypass: No smoothStream (adds delay), no tool approval, no DB
   });
 
